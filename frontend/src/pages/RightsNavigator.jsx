@@ -11,6 +11,7 @@ import { DisclaimerBanner } from '../components/ChatMessage.jsx';
 const ICONS = { consumer: ShoppingBag, cybercrime: ShieldAlert, traffic: Car, criminal: Gavel, civil: Landmark };
 
 export default function RightsNavigator() {
+  useEffect(() => api.warmup(), []);
   const { topicId } = useParams();
   const navigate = useNavigate();
   const [topics, setTopics] = useState([]);

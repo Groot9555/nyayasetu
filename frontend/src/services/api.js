@@ -57,6 +57,7 @@ async function local(fn, ...args) {
 }
 
 const remoteApi = {
+  warmup: () => {},
   health: () => request('/api/health'),
   ask: (question, language = 'en', signal) => request('/api/ask', { method: 'POST', body: { question, language }, signal }),
   decode: (term, act, language = 'en') =>
@@ -73,6 +74,10 @@ const remoteApi = {
 };
 
 const localApi = {
+  warmup: () => {
+    enginePromise ??= import('../local/engine.js');
+    enginePromise.then((e) => e.warmup()).catch(() => {});
+  },
   health: () => local('health'),
   ask: (question) => local('ask', question),
   decode: (term, act) => local('decode', term, act || null),
@@ -85,3 +90,18 @@ const localApi = {
 };
 
 export const api = STATIC_MODE ? localApi : remoteApi;
+
+// Download progress of the in-browser engine (static mode only); returns an unsubscribe function.
+export function subscribeEngine(fn) {
+  if (!STATIC_MODE) return () => {};
+  let unsubscribe = () => {};
+  let cancelled = false;
+  enginePromise ??= import('../local/engine.js');
+  enginePromise.then((e) => {
+    if (!cancelled) unsubscribe = e.subscribe(fn);
+  }).catch(() => {});
+  return () => {
+    cancelled = true;
+    unsubscribe();
+  };
+}

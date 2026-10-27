@@ -13,6 +13,7 @@ const SUGGESTIONS = [
 ];
 
 export default function Ask() {
+  useEffect(() => api.warmup(), []);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);

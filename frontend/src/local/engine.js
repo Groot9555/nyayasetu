@@ -45,15 +45,91 @@ function loadIndex() {
   return indexPromise;
 }
 
+// One-time downloads (bytes), used for the progress indicator.
+const WASM_FILE = 'ort-wasm-simd-threaded.jsep.wasm';
+const EXPECTED_BYTES = { wasm: 21596019, model: 22972370 };
+const EXPECTED_TOTAL = EXPECTED_BYTES.wasm + EXPECTED_BYTES.model;
+const status = { phase: 'idle', loaded: 0, total: EXPECTED_TOTAL };
+const listeners = new Set();
+const fileLoaded = {};
+
+function emit(patch) {
+  Object.assign(status, patch);
+  listeners.forEach((fn) => fn({ ...status }));
+}
+
+function track(name, loaded) {
+  fileLoaded[name] = Math.min(loaded, EXPECTED_BYTES[name]);
+  emit({ phase: 'loading', loaded: Object.values(fileLoaded).reduce((a, b) => a + b, 0) });
+}
+
+export function subscribe(fn) {
+  listeners.add(fn);
+  fn({ ...status });
+  return () => listeners.delete(fn);
+}
+
+async function fetchWithProgress(url, name) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
+  if (!res.body) return res.arrayBuffer();
+  const reader = res.body.getReader();
+  const parts = [];
+  let loaded = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    parts.push(value);
+    loaded += value.length;
+    track(name, loaded);
+  }
+  const out = new Uint8Array(loaded);
+  let offset = 0;
+  for (const part of parts) {
+    out.set(part, offset);
+    offset += part.length;
+  }
+  return out;
+}
+
+// Model and ONNX runtime are self-hosted (see scripts/static-assets.mjs) so no third-party CDN is needed.
 function loadExtractor() {
   if (!extractorPromise) {
-    extractorPromise = import('@huggingface/transformers').then(({ pipeline, env }) => {
-      env.allowLocalModels = false;
-      return pipeline('feature-extraction', MODEL_ID);
+    extractorPromise = (async () => {
+      if (typeof WebAssembly !== 'object') throw new Error('WebAssembly is not supported by this browser.');
+      const base = import.meta.env.BASE_URL;
+      emit({ phase: 'loading' });
+      const [{ pipeline, env }, wasmBinary] = await Promise.all([
+        import('@huggingface/transformers'),
+        fetchWithProgress(`${base}ort/${WASM_FILE}`, 'wasm'),
+      ]);
+      env.allowRemoteModels = false;
+      env.allowLocalModels = true;
+      env.localModelPath = `${base}models/`;
+      env.backends.onnx.wasm.wasmPaths = `${base}ort/`;
+      env.backends.onnx.wasm.wasmBinary = wasmBinary;
+      const extractor = await pipeline('feature-extraction', MODEL_ID, {
+        dtype: 'q8',
+        device: 'wasm',
+        progress_callback: (p) => {
+          if (p.status === 'progress' && p.file?.endsWith('.onnx')) track('model', p.loaded);
+        },
+      });
+      emit({ phase: 'ready', loaded: EXPECTED_TOTAL });
+      return extractor;
+    })();
+    extractorPromise.catch((err) => {
+      console.error('NyayaSetu engine failed to load:', err);
+      extractorPromise = undefined;
+      emit({ phase: 'error' });
     });
-    extractorPromise.catch(() => { extractorPromise = undefined; });
   }
   return extractorPromise;
+}
+
+export function warmup() {
+  loadIndex().catch(() => {});
+  loadExtractor().catch(() => {});
 }
 
 async function embed(text) {

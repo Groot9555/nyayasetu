@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Download, RotateCcw, FileText, Check } from 'lucide-react';
 import { api } from '../services/api.js';
 import LoadingIndicator from '../components/LoadingIndicator.jsx';
@@ -20,6 +20,7 @@ const EMPTY = {
 const CATEGORIES = ['Consumer issue', 'Cybercrime / online fraud', 'Traffic / transport', 'Police matter', 'Civil dispute', 'Public service / government department', 'Other'];
 
 export default function ComplaintGenerator() {
+  useEffect(() => api.warmup(), []);
   const [form, setForm] = useState(EMPTY);
   const [result, setResult] = useState(null);
   const [draft, setDraft] = useState('');

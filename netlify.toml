@@ -2,7 +2,7 @@
 # Regenerate the index with: cd backend && python scripts/ingest_documents.py && python scripts/export_static_index.py
 [build]
   base = "frontend"
-  command = "npm run build && node scripts/static-routes.mjs"
+  command = "node scripts/static-assets.mjs && npm run build && node scripts/static-routes.mjs"
   publish = "dist"
 
 [build.environment]

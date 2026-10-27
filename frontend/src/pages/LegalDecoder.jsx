@@ -14,6 +14,7 @@ const STATUS = {
 };
 
 export default function LegalDecoder() {
+  useEffect(() => api.warmup(), []);
   const [term, setTerm] = useState('');
   const [act, setAct] = useState('');
   const [acts, setActs] = useState([]);
