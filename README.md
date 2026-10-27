@@ -90,7 +90,11 @@ docker run -p 7860:7860 nyayasetu            # http://localhost:7860
 docker run -p 7860:7860 -e LLM_PROVIDER=openai -e LLM_API_KEY=... nyayasetu   # generated answers
 ```
 
-It also runs as a Hugging Face Docker Space (the YAML header at the top of this file is the Space config);
+One-click deploy on Render's free tier (uses `render.yaml`; the repo must be public or connected to Render):
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Groot9555/nyayasetu)
+
+It also runs as a Hugging Face Docker Space (PRO required for Docker Spaces) (the YAML header at the top of this file is the Space config);
 set `LLM_API_KEY` as a Space secret to enable generated answers.
 
 ## API
