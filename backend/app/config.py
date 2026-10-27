@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     documents_dir: Path = BACKEND_DIR / "data" / "documents"
     chroma_dir: Path = BACKEND_DIR / "data" / "chroma"
     collection_name: str = "nyayasetu_legal"
+    # Built frontend (frontend/dist) to serve from the same origin in single-container deployments
+    static_dir: Path | None = None
 
     # "default" = ChromaDB's bundled all-MiniLM-L6-v2 (ONNX, runs locally); "hash" = offline test embedder
     embedding_backend: str = "default"

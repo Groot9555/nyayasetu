@@ -1,3 +1,14 @@
+---
+title: NyayaSetu
+emoji: ⚖️
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Source-grounded Indian legal-information guidance (RAG)
+---
+
 # NyayaSetu
 
 AI-powered legal-information and civilian-rights guidance web app (BCA minor project, 2026–27).
@@ -67,6 +78,20 @@ npm run dev                 # http://localhost:5173
 cd backend && python -m pytest -q        # uses a mocked LLM and offline hash embeddings
 cd frontend && npm run lint && npm run build
 ```
+
+## Deployment (single container)
+
+The root `Dockerfile` builds the frontend, installs the backend, and builds the ChromaDB index at image build time.
+FastAPI serves the built frontend (`STATIC_DIR`) and the API from the same origin, so no CORS setup is needed.
+
+```bash
+docker build -t nyayasetu .
+docker run -p 7860:7860 nyayasetu            # http://localhost:7860
+docker run -p 7860:7860 -e LLM_PROVIDER=openai -e LLM_API_KEY=... nyayasetu   # generated answers
+```
+
+It also runs as a Hugging Face Docker Space (the YAML header at the top of this file is the Space config);
+set `LLM_API_KEY` as a Space secret to enable generated answers.
 
 ## API
 

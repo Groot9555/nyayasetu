@@ -3,7 +3,8 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .api.routes import router
 from .config import get_settings
@@ -40,7 +41,23 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=500, content={"detail": "Something went wrong on the server. Please try again."})
 
     app.include_router(router)
+    if settings.static_dir and (settings.static_dir / "index.html").is_file():
+        mount_frontend(app, settings.static_dir.resolve())
     return app
+
+
+def mount_frontend(app: FastAPI, static_dir) -> None:
+    app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
+    index = static_dir / "index.html"
+
+    @app.get("/{path:path}", include_in_schema=False)
+    async def spa(path: str):
+        if path.startswith("api/"):
+            return JSONResponse(status_code=404, content={"detail": "Not found."})
+        candidate = (static_dir / path).resolve()
+        if path and candidate.is_file() and candidate.is_relative_to(static_dir):
+            return FileResponse(candidate)
+        return FileResponse(index)
 
 
 app = create_app()
