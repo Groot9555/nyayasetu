@@ -1,0 +1,28 @@
+[
+  {
+    "file": "it_act_2000.pdf",
+    "doc_id": "it_act_2000",
+    "title": "The Information Technology Act, 2000 (updated text, India Code)",
+    "act_name": "Information Technology Act, 2000",
+    "short_name": "IT Act",
+    "jurisdiction": "India",
+    "legal_status": "In force (as published on India Code; check for later amendments)",
+    "effective_date": "2000-10-17",
+    "official_url": "https://www.indiacode.nic.in/bitstream/123456789/13116/1/it_act_2000_updated.pdf",
+    "date_checked": "2026-10-27",
+    "version": "India Code updated PDF"
+  },
+  {
+    "file": "motor_vehicles_act_1988.pdf",
+    "doc_id": "motor_vehicles_act_1988",
+    "title": "The Motor Vehicles Act, 1988 (India Code)",
+    "act_name": "Motor Vehicles Act, 1988",
+    "short_name": "MV Act",
+    "jurisdiction": "India",
+    "legal_status": "In force (as published on India Code; penalties may be modified by state notifications)",
+    "effective_date": "1989-07-01",
+    "official_url": "https://www.indiacode.nic.in/bitstream/123456789/9460/1/a1988-59.pdf",
+    "date_checked": "2026-10-27",
+    "version": "India Code PDF"
+  }
+]
