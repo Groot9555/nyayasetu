@@ -1,0 +1,15 @@
+# Static, browser-only build: retrieval runs client-side against the exported index in frontend/public/index.
+# Regenerate the index with: cd backend && python scripts/ingest_documents.py && python scripts/export_static_index.py
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_STATIC_MODE = "true"
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

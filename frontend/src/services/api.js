@@ -41,7 +41,22 @@ async function request(path, { method = 'GET', body, responseType = 'json', sign
   return responseType === 'blob' ? res.blob() : res.json();
 }
 
-export const api = {
+// Static mode (e.g. Netlify): run the retrieval engine in the browser instead of calling the backend.
+const STATIC_MODE = import.meta.env.VITE_STATIC_MODE === 'true';
+let enginePromise;
+
+async function local(fn, ...args) {
+  enginePromise ??= import('../local/engine.js');
+  const engine = await enginePromise;
+  try {
+    return await engine[fn](...args);
+  } catch (err) {
+    if (err instanceof engine.ValidationError) throw new ApiError(err.message, 422);
+    throw new ApiError('Could not load the legal search engine in your browser. Check your connection and try again.', 0);
+  }
+}
+
+const remoteApi = {
   health: () => request('/api/health'),
   ask: (question, language = 'en', signal) => request('/api/ask', { method: 'POST', body: { question, language }, signal }),
   decode: (term, act, language = 'en') =>
@@ -56,3 +71,17 @@ export const api = {
     request(`/api/legal-sources/search?q=${encodeURIComponent(q)}${act ? `&act=${encodeURIComponent(act)}` : ''}`),
   listSources: () => request('/api/legal-sources'),
 };
+
+const localApi = {
+  health: () => local('health'),
+  ask: (question) => local('ask', question),
+  decode: (term, act) => local('decode', term, act || null),
+  rightsTopics: () => local('rightsTopics'),
+  navigateRights: (topic, description) => local('navigateRights', topic, description),
+  generateComplaint: (fields) => local('generateComplaint', fields),
+  complaintPdf: (draft, title) => local('complaintPdf', draft, title),
+  searchSources: (q, act) => local('searchSources', q, act),
+  listSources: () => local('listSources'),
+};
+
+export const api = STATIC_MODE ? localApi : remoteApi;
