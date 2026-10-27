@@ -19,19 +19,19 @@ export default function SourceCard({ source, index }) {
           </div>
         </div>
       </div>
-      {source.excerpt && (
-        <>
+      <div className="source-actions">
+        {source.excerpt && (
           <button className="link-btn small" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
             {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {open ? 'Hide' : 'Show'} retrieved text
           </button>
-          {open && <blockquote className="excerpt">{source.excerpt}</blockquote>}
-        </>
-      )}
-      {source.url && (
-        <a className="small source-link" href={source.url} target="_blank" rel="noopener noreferrer">
-          Official source <ExternalLink size={12} />
-        </a>
-      )}
+        )}
+        {source.url && (
+          <a className="small source-link" href={source.url} target="_blank" rel="noopener noreferrer">
+            Official source <ExternalLink size={12} />
+          </a>
+        )}
+      </div>
+      {open && source.excerpt && <blockquote className="excerpt">{source.excerpt}</blockquote>}
     </div>
   );
 }

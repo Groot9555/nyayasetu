@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
+      allowedHosts: true,
       // When VITE_API_BASE_URL is empty, the frontend calls same-origin /api and Vite forwards it to the backend.
       proxy: { '/api': { target: env.BACKEND_PROXY_TARGET || 'http://localhost:8000', changeOrigin: true } },
     },

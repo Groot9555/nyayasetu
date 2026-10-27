@@ -148,7 +148,8 @@ code { background: #eef1f5; padding: 0 4px; border-radius: 4px; }
 .source-head { display: flex; gap: 8px; align-items: flex-start; }
 .source-head svg { margin-top: 3px; flex-shrink: 0; }
 .source-title { font-weight: 600; font-size: 0.92rem; }
-.source-link { display: inline-flex; gap: 4px; align-items: center; margin-top: 4px; }
+.source-actions { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin-top: 4px; }
+.source-link { display: inline-flex; gap: 4px; align-items: center; }
 .excerpt { margin: 6px 0; padding: 8px 12px; background: #f8fafc; border-left: 3px solid #c8d3df; font-size: 0.85rem; white-space: pre-wrap; color: #33414f; }
 .excerpt.long { max-height: 360px; overflow-y: auto; }
 
